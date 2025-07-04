@@ -1,0 +1,65 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.example.playback_tv'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.example.playback_tv"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation libs.appcompat.v161
+    implementation libs.constraintlayout.v214
+//    implementation libs.leanback
+//    implementation libs.leanback.preference
+    implementation libs.recyclerview
+    implementation libs.work.runtime
+
+    // ExoPlayer
+    implementation libs.exoplayer
+    implementation libs.google.exoplayer.core
+    implementation libs.google.exoplayer.ui
+    implementation libs.google.exoplayer.dash
+    implementation libs.google.exoplayer.hls
+
+    // Networking
+    implementation libs.okhttp
+    implementation libs.retrofit
+    implementation libs.converter.gson
+    implementation libs.gson
+
+    // Location services
+    implementation libs.play.services.location
+
+    // Database
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
+
+    testImplementation libs.junit
+    androidTestImplementation libs.junit.v115
+    androidTestImplementation libs.espresso.core.v351
+}

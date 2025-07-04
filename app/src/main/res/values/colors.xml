@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="tv_background">#FF0F0F0F</color>
+    <color name="tv_text_primary">#FFFFFFFF</color>
+    <color name="tv_text_secondary">#FFCCCCCC</color>
+    <color name="tv_button_text">#FFFFFFFF</color>
+    <color name="tv_button_primary">#FF1976D2</color>
+    <color name="tv_button_secondary">#FF424242</color>
+    <color name="tv_button_focused">#FF42A5F5</color>
+</resources>

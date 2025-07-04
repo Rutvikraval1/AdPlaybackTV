@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="48dp"
+    android:background="@color/tv_background"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ad Playback System"
+        android:textSize="36sp"
+        android:textColor="@color/tv_text_primary"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="32dp" />
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ready to play ads"
+        android:textSize="18sp"
+        android:textColor="@color/tv_text_secondary"
+        android:gravity="center"
+        android:layout_marginBottom="48dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <Button
+            android:id="@+id/play_button"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="Play Ads"
+            android:textSize="18sp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_primary"
+            android:textColor="@color/tv_button_text"
+            android:focusable="true"
+            android:nextFocusRight="@+id/download_button" />
+
+        <Button
+            android:id="@+id/download_button"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="Download Ads"
+            android:textSize="18sp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_secondary"
+            android:textColor="@color/tv_button_text"
+            android:focusable="true"
+            android:nextFocusLeft="@+id/play_button"
+            android:nextFocusRight="@+id/refresh_button" />
+
+        <Button
+            android:id="@+id/refresh_button"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="Refresh"
+            android:textSize="18sp"
+            android:background="@drawable/button_secondary"
+            android:textColor="@color/tv_button_text"
+            android:focusable="true"
+            android:nextFocusLeft="@+id/download_button" />
+
+    </LinearLayout>
+
+</LinearLayout>

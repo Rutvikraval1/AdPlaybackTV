@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Leanback" parent="Base.Theme.Playback_tv">
+        <item name="android:colorPrimary">@color/tv_button_primary</item>
+        <item name="android:colorPrimaryDark">@color/tv_background</item>
+        <item name="android:colorAccent">@color/tv_button_focused</item>
+        <item name="android:windowBackground">@color/tv_background</item>
+        <item name="android:textColorPrimary">@color/tv_text_primary</item>
+        <item name="android:textColorSecondary">@color/tv_text_secondary</item>
+    </style>
+</resources>
