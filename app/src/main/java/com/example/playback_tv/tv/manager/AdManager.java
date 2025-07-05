@@ -55,7 +55,8 @@ public class AdManager {
                     prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
                     
                     Log.d(TAG, "Loaded temporary manifest with " + 
-                          currentManifest.getAds().size() + " ads");
+                          currentManifest.getAds().size() + " items and " +
+                          (currentManifest.getAdBreaks() != null ? currentManifest.getAdBreaks().size() : 0) + " breaks");
                     
                     callback.onSuccess();
                 } catch (Exception e) {
@@ -177,6 +178,21 @@ public class AdManager {
         return null;
     }
 
+    public AdManifest getCurrentManifest() {
+        if (currentManifest == null) {
+            loadCachedManifest();
+        }
+        
+        // If still no manifest, load temp data
+        if (currentManifest == null) {
+            Log.d(TAG, "No cached manifest, loading temp data");
+            currentManifest = TempAdData.createTempManifest();
+            prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+        }
+        
+        return currentManifest;
+    }
+
     private void loadCachedManifest() {
         String manifestJson = prefsHelper.getCachedManifest();
         if (manifestJson != null) {
@@ -197,6 +213,30 @@ public class AdManager {
         currentManifest.setLastUpdated("2025-01-04T10:00:00Z");
         currentManifest.setGeoLocation("US-NY");
         currentManifest.setAds(TempAdData.createShortTestAds());
+        currentManifest.setBreakIntervalMinutes(5); // 5 minutes for testing
+        currentManifest.setDefaultBreakDuration(30); // 30 seconds
+        prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+    }
+
+    public void loadContentOnlyPlaylist() {
+        currentManifest = new AdManifest();
+        currentManifest.setVersion("1.0.0");
+        currentManifest.setLastUpdated("2025-01-04T10:00:00Z");
+        currentManifest.setGeoLocation("US-NY");
+        currentManifest.setAds(TempAdData.createContentOnlyPlaylist());
+        currentManifest.setBreakIntervalMinutes(10); // 10 minutes for content
+        currentManifest.setDefaultBreakDuration(60); // 1 minute breaks
+        prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+    }
+
+    public void loadAdOnlyPlaylist() {
+        currentManifest = new AdManifest();
+        currentManifest.setVersion("1.0.0");
+        currentManifest.setLastUpdated("2025-01-04T10:00:00Z");
+        currentManifest.setGeoLocation("US-NY");
+        currentManifest.setAds(TempAdData.createAdOnlyPlaylist());
+        currentManifest.setBreakIntervalMinutes(0); // No breaks for ad-only
+        currentManifest.setDefaultBreakDuration(0);
         prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
     }
 

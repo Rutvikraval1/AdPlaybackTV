@@ -16,8 +16,20 @@ public class AdManifest {
     
     @SerializedName("ads")
     private List<AdItem> ads;
+    
+    @SerializedName("ad_breaks")
+    private List<AdBreak> adBreaks;
+    
+    @SerializedName("break_interval_minutes")
+    private int breakIntervalMinutes; // Auto break every X minutes
+    
+    @SerializedName("default_break_duration")
+    private int defaultBreakDuration; // Default break duration in seconds
 
-    public AdManifest() {}
+    public AdManifest() {
+        this.breakIntervalMinutes = 30; // Default 30 minutes
+        this.defaultBreakDuration = 120; // Default 2 minutes
+    }
 
     // Getters and setters
     public String getVersion() { return version; }
@@ -32,6 +44,15 @@ public class AdManifest {
     public List<AdItem> getAds() { return ads; }
     public void setAds(List<AdItem> ads) { this.ads = ads; }
 
+    public List<AdBreak> getAdBreaks() { return adBreaks; }
+    public void setAdBreaks(List<AdBreak> adBreaks) { this.adBreaks = adBreaks; }
+
+    public int getBreakIntervalMinutes() { return breakIntervalMinutes; }
+    public void setBreakIntervalMinutes(int breakIntervalMinutes) { this.breakIntervalMinutes = breakIntervalMinutes; }
+
+    public int getDefaultBreakDuration() { return defaultBreakDuration; }
+    public void setDefaultBreakDuration(int defaultBreakDuration) { this.defaultBreakDuration = defaultBreakDuration; }
+
     @Override
     public String toString() {
         return "AdManifest{" +
@@ -39,6 +60,8 @@ public class AdManifest {
                 ", lastUpdated='" + lastUpdated + '\'' +
                 ", geoLocation='" + geoLocation + '\'' +
                 ", ads=" + (ads != null ? ads.size() : 0) +
+                ", adBreaks=" + (adBreaks != null ? adBreaks.size() : 0) +
+                ", breakIntervalMinutes=" + breakIntervalMinutes +
                 '}';
     }
 }
