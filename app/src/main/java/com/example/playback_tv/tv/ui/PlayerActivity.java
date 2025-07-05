@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -88,15 +89,23 @@ public class PlayerActivity extends FragmentActivity {
         currentPlaylist = adManager.getCurrentPlaylist();
         
         if (currentPlaylist != null && !currentPlaylist.isEmpty()) {
+            Log.d(TAG, "Loaded playlist with " + currentPlaylist.size() + " ads");
+            
             // Resume from last position if available
             currentAdIndex = prefsHelper.getLastPlayedAdIndex();
             if (currentAdIndex >= currentPlaylist.size()) {
                 currentAdIndex = 0;
             }
             
+            // Show toast with playlist info
+            Toast.makeText(this, 
+                "Playing " + currentPlaylist.size() + " ads", 
+                Toast.LENGTH_SHORT).show();
+            
             playNextAd();
         } else {
             Log.e(TAG, "No ads available for playback");
+            Toast.makeText(this, "No ads available", Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -109,23 +118,30 @@ public class PlayerActivity extends FragmentActivity {
         
         AdItem adItem = currentPlaylist.get(currentAdIndex);
         
-        if (adItem != null && adItem.getLocalPath() != null) {
-            playAd(adItem);
+        if (adItem != null) {
+            // For temp data, we'll play directly from URL
+            // Check if we have a local cached version first
+            if (adItem.getLocalPath() != null) {
+                playAd(adItem);
+            } else {
+                // Play from URL directly (for temp data)
+                playAdFromUrl(adItem);
+            }
         } else {
-            Log.w(TAG, "Ad not available locally, skipping");
+            Log.w(TAG, "Ad item is null, skipping");
             currentAdIndex++;
             playNextAd();
         }
     }
 
     private void playAd(AdItem adItem) {
-        Log.d(TAG, "Playing ad: " + adItem.getTitle());
+        Log.d(TAG, "Playing cached ad: " + adItem.getTitle());
         
         // Save current position
         prefsHelper.saveLastPlayedAdIndex(currentAdIndex);
         prefsHelper.saveLastPlayedAdId(adItem.getId());
         
-        // Create media source
+        // Create media source from local file
         DefaultDataSourceFactory dataSourceFactory = 
                 new DefaultDataSourceFactory(this, "AdPlayback");
         MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
@@ -140,6 +156,40 @@ public class PlayerActivity extends FragmentActivity {
         
         // Update analytics
         playbackManager.trackAdPlayback(adItem);
+        
+        // Show current ad info
+        Toast.makeText(this, 
+            "Playing: " + adItem.getTitle() + " (" + (currentAdIndex + 1) + "/" + currentPlaylist.size() + ")", 
+            Toast.LENGTH_SHORT).show();
+    }
+
+    private void playAdFromUrl(AdItem adItem) {
+        Log.d(TAG, "Playing ad from URL: " + adItem.getTitle());
+        
+        // Save current position
+        prefsHelper.saveLastPlayedAdIndex(currentAdIndex);
+        prefsHelper.saveLastPlayedAdId(adItem.getId());
+        
+        // Create media source from URL
+        DefaultDataSourceFactory dataSourceFactory = 
+                new DefaultDataSourceFactory(this, "AdPlayback");
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(Uri.parse(adItem.getVideoUrl())));
+        
+        // Set media source and play
+        player.setMediaSource(mediaSource);
+        player.prepare();
+        player.play();
+        
+        isPlaying = true;
+        
+        // Update analytics
+        playbackManager.trackAdPlayback(adItem);
+        
+        // Show current ad info
+        Toast.makeText(this, 
+            "Streaming: " + adItem.getTitle() + " (" + (currentAdIndex + 1) + "/" + currentPlaylist.size() + ")", 
+            Toast.LENGTH_SHORT).show();
     }
 
     private void handlePlaybackStateChange(int state) {

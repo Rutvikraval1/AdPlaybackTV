@@ -28,6 +28,7 @@ public class MainActivity extends FragmentActivity {
     private Button playButton;
     private Button downloadButton;
     private Button refreshButton;
+    private Button loadShortAdsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,9 @@ public class MainActivity extends FragmentActivity {
         initializeComponents();
         setupViews();
         setupListeners();
+        
+        // Load temp data immediately for testing
+        loadTempData();
         
         // Check for auto-resume
         checkAutoResume();
@@ -57,6 +61,7 @@ public class MainActivity extends FragmentActivity {
         playButton = findViewById(R.id.play_button);
         downloadButton = findViewById(R.id.download_button);
         refreshButton = findViewById(R.id.refresh_button);
+        loadShortAdsButton = findViewById(R.id.load_short_ads_button);
         
         updateUI();
     }
@@ -65,6 +70,37 @@ public class MainActivity extends FragmentActivity {
         playButton.setOnClickListener(v -> startPlayback());
         downloadButton.setOnClickListener(v -> downloadAds());
         refreshButton.setOnClickListener(v -> refreshManifest());
+        loadShortAdsButton.setOnClickListener(v -> loadShortTestAds());
+    }
+
+    private void loadTempData() {
+        statusText.setText("Loading temporary ads...");
+        
+        // Load temp manifest immediately
+        adManager.refreshManifest("temp", new AdManager.ManifestCallback() {
+            @Override
+            public void onSuccess() {
+                runOnUiThread(() -> {
+                    statusText.setText("Temporary ads loaded successfully");
+                    updateUI();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    statusText.setText("Failed to load temp ads: " + error);
+                });
+            }
+        });
+    }
+
+    private void loadShortTestAds() {
+        statusText.setText("Loading short test ads...");
+        
+        adManager.loadShortTestAds();
+        statusText.setText("Short test ads loaded (15 seconds each)");
+        updateUI();
     }
 
     private void startPlayback() {
@@ -140,8 +176,16 @@ public class MainActivity extends FragmentActivity {
         int cachedAdsCount = cacheManager.getCachedAdsCount();
         String currentLocation = locationManager.getCachedLocation();
         
-        statusText.setText(String.format("Cached ads: %d\nLocation: %s", 
-                cachedAdsCount, currentLocation != null ? currentLocation : "Unknown"));
+        // Get current playlist info
+        var currentPlaylist = adManager.getCurrentPlaylist();
+        int totalAds = currentPlaylist != null ? currentPlaylist.size() : 0;
+        
+        statusText.setText(String.format(
+            "Total ads: %d\nCached ads: %d\nLocation: %s\n\nReady to play!", 
+            totalAds,
+            cachedAdsCount, 
+            currentLocation != null ? currentLocation : "Unknown"
+        ));
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.example.playback_tv.tv.manager;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.playback_tv.tv.data.TempAdData;
 import com.example.playback_tv.tv.model.AdItem;
 import com.example.playback_tv.tv.model.AdManifest;
 import com.example.playback_tv.tv.network.ApiService;
@@ -20,6 +21,7 @@ import retrofit2.Response;
 
 public class AdManager {
     private static final String TAG = "AdManager";
+    private static final boolean USE_TEMP_DATA = true; // Set to false to use real API
     
     private final Context context;
     private final ApiService apiService;
@@ -42,6 +44,29 @@ public class AdManager {
     public void refreshManifest(String location, ManifestCallback callback) {
         Log.d(TAG, "Refreshing manifest for location: " + location);
         
+        if (USE_TEMP_DATA) {
+            // Use temporary data for testing
+            executor.execute(() -> {
+                try {
+                    // Simulate network delay
+                    Thread.sleep(1000);
+                    
+                    currentManifest = TempAdData.createTempManifest();
+                    prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+                    
+                    Log.d(TAG, "Loaded temporary manifest with " + 
+                          currentManifest.getAds().size() + " ads");
+                    
+                    callback.onSuccess();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error loading temp manifest", e);
+                    callback.onError(e.getMessage());
+                }
+            });
+            return;
+        }
+        
+        // Original API call code
         executor.execute(() -> {
             try {
                 Call<AdManifest> call = apiService.getAdManifest(location);
@@ -53,18 +78,35 @@ public class AdManager {
                             prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
                             callback.onSuccess();
                         } else {
-                            callback.onError("Failed to fetch manifest");
+                            // Fallback to temp data if API fails
+                            Log.w(TAG, "API failed, using temp data");
+                            loadTempDataAsFallback(callback);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<AdManifest> call, Throwable t) {
                         Log.e(TAG, "Error fetching manifest", t);
-                        callback.onError(t.getMessage());
+                        // Fallback to temp data if API fails
+                        loadTempDataAsFallback(callback);
                     }
                 });
             } catch (Exception e) {
                 Log.e(TAG, "Exception in refreshManifest", e);
+                loadTempDataAsFallback(callback);
+            }
+        });
+    }
+
+    private void loadTempDataAsFallback(ManifestCallback callback) {
+        executor.execute(() -> {
+            try {
+                currentManifest = TempAdData.createTempManifest();
+                prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+                Log.d(TAG, "Loaded temp data as fallback");
+                callback.onSuccess();
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading temp data fallback", e);
                 callback.onError(e.getMessage());
             }
         });
@@ -73,6 +115,12 @@ public class AdManager {
     public void downloadAds(DownloadCallback callback) {
         if (currentManifest == null) {
             loadCachedManifest();
+        }
+        
+        // If still no manifest, load temp data
+        if (currentManifest == null) {
+            currentManifest = TempAdData.createTempManifest();
+            prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
         }
         
         if (currentManifest == null || currentManifest.getAds() == null) {
@@ -115,6 +163,13 @@ public class AdManager {
             loadCachedManifest();
         }
         
+        // If still no manifest, load temp data
+        if (currentManifest == null) {
+            Log.d(TAG, "No cached manifest, loading temp data");
+            currentManifest = TempAdData.createTempManifest();
+            prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+        }
+        
         if (currentManifest != null) {
             return currentManifest.getAds();
         }
@@ -127,6 +182,22 @@ public class AdManager {
         if (manifestJson != null) {
             currentManifest = JsonParser.fromJson(manifestJson, AdManifest.class);
         }
+    }
+
+    // Method to switch between temp data and real API
+    public void setUseTempData(boolean useTempData) {
+        // This could be used to toggle between temp and real data
+        // For now, we use the constant at the top of the class
+    }
+
+    // Method to load different types of temp data
+    public void loadShortTestAds() {
+        currentManifest = new AdManifest();
+        currentManifest.setVersion("1.0.0");
+        currentManifest.setLastUpdated("2025-01-04T10:00:00Z");
+        currentManifest.setGeoLocation("US-NY");
+        currentManifest.setAds(TempAdData.createShortTestAds());
+        prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
     }
 
     public interface ManifestCallback {
