@@ -17,7 +17,7 @@ public class TempAdData {
         manifest.setGeoLocation("US-NY");
         manifest.setAds(createTempAds());
         manifest.setAdBreaks(createTempAdBreaks());
-        manifest.setBreakIntervalMinutes(15); // Break every 15 minutes for testing
+        manifest.setBreakIntervalMinutes(2); // 2-minute break system
         manifest.setDefaultBreakDuration(90); // 90 seconds default break
         return manifest;
     }
@@ -176,15 +176,15 @@ public class TempAdData {
         eveningBreak.setAds(createBreakAds("evening"));
         adBreaks.add(eveningBreak);
         
-        // Test break (5 minutes from now for immediate testing)
+        // Immediate test break (30 seconds from now for immediate testing)
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, 2); // 2 minutes from now
+        calendar.add(Calendar.SECOND, 30); // 30 seconds from now
         String testTime = String.format("%02d:%02d", 
             calendar.get(Calendar.HOUR_OF_DAY), 
             calendar.get(Calendar.MINUTE));
         
         AdBreak testBreak = new AdBreak();
-        testBreak.setId("test_break");
+        testBreak.setId("immediate_test_break");
         testBreak.setBreakTime(testTime);
         testBreak.setBreakDuration(60); // 1 minute
         testBreak.setBreakType("scheduled");
@@ -272,8 +272,8 @@ public class TempAdData {
             case "test":
                 ads.add(createAdItem(
                     "test_ad_1",
-                    "Test Break Ad",
-                    "This is a test break advertisement",
+                    "Immediate Test Break Ad",
+                    "This is an immediate test break advertisement",
                     "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
                     15,
                     "US-NY",
@@ -334,14 +334,14 @@ public class TempAdData {
         return ads;
     }
     
-    // Short test videos for quick testing
+    // Short test videos for quick testing (2-minute break system)
     public static List<AdItem> createShortTestAds() {
         List<AdItem> ads = new ArrayList<>();
         
         ads.add(createAdItem(
             "short_001",
             "Short Test 1",
-            "15 second test video",
+            "15 second test video for 2-min breaks",
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
             15,
             "US-NY",
@@ -351,7 +351,7 @@ public class TempAdData {
         ads.add(createAdItem(
             "short_002",
             "Short Test 2",
-            "15 second test video",
+            "15 second test video for 2-min breaks",
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
             15,
             "US-NY",
@@ -361,7 +361,7 @@ public class TempAdData {
         ads.add(createAdItem(
             "short_003",
             "Short Test 3",
-            "15 second test video",
+            "15 second test video for 2-min breaks",
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
             15,
             "US-NY",
@@ -371,14 +371,14 @@ public class TempAdData {
         return ads;
     }
     
-    // Content-only playlist (no ads)
+    // Content-only playlist (no ads) with 2-minute breaks
     public static List<AdItem> createContentOnlyPlaylist() {
         List<AdItem> content = new ArrayList<>();
         
         content.add(createAdItem(
             "content_big_buck",
             "Big Buck Bunny",
-            "Full length animated short",
+            "Full length animated short with 2-min breaks",
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
             596,
             "US-NY",
@@ -389,7 +389,7 @@ public class TempAdData {
         content.add(createAdItem(
             "content_sintel",
             "Sintel",
-            "Fantasy animated short",
+            "Fantasy animated short with 2-min breaks",
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
             888,
             "US-NY",
@@ -400,7 +400,7 @@ public class TempAdData {
         return content;
     }
     
-    // Ad-only playlist (no content)
+    // Ad-only playlist (no content, no 2-minute breaks)
     public static List<AdItem> createAdOnlyPlaylist() {
         List<AdItem> ads = new ArrayList<>();
         

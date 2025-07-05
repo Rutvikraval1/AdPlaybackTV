@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ad Playback System with Break Time"
+        android:text="2-Minute Break Time System"
         android:textSize="32sp"
         android:textColor="@color/tv_text_primary"
         android:fontFamily="sans-serif-medium"
@@ -21,7 +21,7 @@
         android:id="@+id/status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ready to play ads with scheduled breaks"
+        android:text="Ready to play content with 2-minute ad breaks"
         android:textSize="16sp"
         android:textColor="@color/tv_text_secondary"
         android:gravity="center"
@@ -76,8 +76,8 @@
             android:id="@+id/force_break_button"
             android:layout_width="160dp"
             android:layout_height="60dp"
-            android:text="Force Break"
-            android:textSize="14sp"
+            android:text="Force 2-Min Break"
+            android:textSize="12sp"
             android:background="@drawable/button_secondary"
             android:textColor="@color/tv_button_text"
             android:focusable="true"
@@ -148,14 +148,15 @@
 
     </LinearLayout>
 
-    <!-- Break Schedule Info -->
+    <!-- 2-Minute Break System Info -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Break Schedule: Morning (9:00), Afternoon (14:30), Evening (19:00)\nInterval Breaks: Every 15 minutes\nTest Break: 2 minutes from app start"
+        android:text="🔴 2-MINUTE BREAK SYSTEM ACTIVE 🔴\n\n⏰ Automatic breaks every 2 minutes during content\n📺 90-second ad breaks with multiple ads\n🎯 Real-time break countdown in player\n⚡ Immediate test break: 30 seconds after start\n\n🎮 Use 'Force 2-Min Break' to test manually"
         android:textSize="12sp"
         android:textColor="@color/tv_text_secondary"
         android:gravity="center"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:lineSpacingExtra="2dp" />
 
 </LinearLayout>

@@ -100,6 +100,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
     private Runnable hideControlsRunnable;
     private Runnable updateProgressRunnable;
     private Runnable hideVolumeIndicatorRunnable;
+    private Runnable updateBreakTimerRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +125,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         loadPlaylist();
         setupBreakTimeManager();
         startProgressUpdater();
+        startBreakTimerUpdater();
     }
 
     private void initializeComponents() {
@@ -139,6 +141,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         hideControlsRunnable = this::hideControls;
         updateProgressRunnable = this::updateProgress;
         hideVolumeIndicatorRunnable = this::hideVolumeIndicator;
+        updateBreakTimerRunnable = this::updateBreakTimer;
     }
 
     private void setupViews() {
@@ -201,6 +204,13 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
                 PlayerActivity.this.isPlaying = isPlaying;
                 updatePlayPauseButton();
                 updateStatusOverlay();
+                
+                // Notify break time manager about content state
+                if (isPlaying && !isInBreak) {
+                    breakTimeManager.onContentStarted();
+                } else if (!isPlaying && !isInBreak) {
+                    breakTimeManager.onContentPaused();
+                }
             }
         });
     }
@@ -287,9 +297,29 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
                 manifest.getBreakIntervalMinutes()
             );
             
-            Log.d(TAG, "Scheduled " + manifest.getAdBreaks().size() + " ad breaks");
+            Log.d(TAG, "Scheduled " + manifest.getAdBreaks().size() + " ad breaks with 2-minute system");
             updateBreakInfo();
         }
+    }
+
+    private void startBreakTimerUpdater() {
+        updateBreakTimer();
+    }
+
+    private void updateBreakTimer() {
+        if (breakTimeManager != null) {
+            String timeUntilBreak = breakTimeManager.getFormattedTimeUntilNextBreak();
+            int breakCount = breakTimeManager.getBreakCounter();
+            
+            if (isInBreak) {
+                nextBreakInfo.setText("AD BREAK IN PROGRESS");
+            } else {
+                nextBreakInfo.setText("Next 2-min break: " + timeUntilBreak + " | Breaks: " + breakCount);
+            }
+        }
+        
+        // Update every second
+        uiHandler.postDelayed(updateBreakTimerRunnable, 1000);
     }
 
     // Playback control methods
@@ -382,7 +412,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
     private void forceAdBreak() {
         if (breakTimeManager != null) {
             breakTimeManager.forceBreak();
-            Toast.makeText(this, "Forcing ad break...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Forcing 2-minute ad break...", Toast.LENGTH_SHORT).show();
         }
         resetControlsTimer();
     }
@@ -529,11 +559,9 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
 
     private void updateStatusOverlay() {
         if (isInBreak) {
-            breakStatus.setText("AD BREAK");
-            nextBreakInfo.setText("Break in progress...");
+            breakStatus.setText("🔴 2-MINUTE AD BREAK");
         } else {
-            breakStatus.setText("Normal Playback");
-            nextBreakInfo.setText("Next break: 15 min");
+            breakStatus.setText("▶ Content Playing");
         }
     }
 
@@ -542,7 +570,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         AdManifest manifest = adManager.getCurrentManifest();
         if (manifest != null) {
             nextBreakInfo.setText(String.format(Locale.getDefault(),
-                "Breaks: %d scheduled", 
+                "2-min breaks active | Scheduled: %d", 
                 manifest.getAdBreaks() != null ? manifest.getAdBreaks().size() : 0));
         }
     }
@@ -622,7 +650,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
     }
 
     private void playBreakAd(AdItem breakAd) {
-        Log.d(TAG, "Playing break ad: " + breakAd.getTitle());
+        Log.d(TAG, "Playing 2-minute break ad: " + breakAd.getTitle());
         
         DefaultDataSourceFactory dataSourceFactory = 
                 new DefaultDataSourceFactory(this, "AdPlayback");
@@ -636,7 +664,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         playbackManager.trackAdPlayback(breakAd);
         
         Toast.makeText(this, 
-            "Break Ad: " + breakAd.getTitle() + " (" + (breakAdIndex + 1) + "/" + breakAds.size() + ")", 
+            "2-Min Break: " + breakAd.getTitle() + " (" + (breakAdIndex + 1) + "/" + breakAds.size() + ")", 
             Toast.LENGTH_SHORT).show();
     }
 
@@ -680,7 +708,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
     // BreakTimeManager.BreakTimeCallback implementation
     @Override
     public void onBreakTimeTriggered(AdBreak adBreak) {
-        Log.d(TAG, "Break time triggered: " + adBreak.getId());
+        Log.d(TAG, "2-minute break triggered: " + adBreak.getId());
         
         if (isInBreak) {
             Log.d(TAG, "Already in break, ignoring new break");
@@ -698,7 +726,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
 
     @Override
     public void onBreakTimeEnded(AdBreak adBreak) {
-        Log.d(TAG, "Break time ended: " + adBreak.getId());
+        Log.d(TAG, "2-minute break ended: " + adBreak.getId());
         
         if (!isInBreak) {
             return;
@@ -708,7 +736,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
     }
 
     private void startBreak(AdBreak adBreak) {
-        Log.d(TAG, "Starting ad break: " + adBreak.getId());
+        Log.d(TAG, "Starting 2-minute ad break: " + adBreak.getId());
         
         isInBreak = true;
         breakAdIndex = 0;
@@ -716,8 +744,11 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         
         updateStatusOverlay();
         
+        String breakType = "2_minute_interval".equals(adBreak.getBreakType()) ? 
+            "2-Minute Break" : "Ad Break";
+        
         Toast.makeText(this, 
-            "Ad Break Started: " + adBreak.getId(), 
+            breakType + " Started: " + adBreak.getId(), 
             Toast.LENGTH_LONG).show();
         
         if (breakAds != null && !breakAds.isEmpty()) {
@@ -728,7 +759,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
     }
 
     private void endBreak() {
-        Log.d(TAG, "Ending ad break");
+        Log.d(TAG, "Ending 2-minute ad break");
         
         isInBreak = false;
         breakAdIndex = 0;
@@ -737,7 +768,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         updateStatusOverlay();
         
         Toast.makeText(this, 
-            "Ad Break Ended - Resuming Content", 
+            "2-Minute Break Ended - Resuming Content", 
             Toast.LENGTH_SHORT).show();
         
         if (pausedMainContent != null) {
@@ -762,6 +793,9 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         
         pausedMainContent = null;
         pausedPosition = 0;
+        
+        // Notify break time manager that content resumed
+        breakTimeManager.onContentResumed();
     }
 
     // Key event handling for remote control
@@ -828,6 +862,7 @@ public class PlayerActivity extends FragmentActivity implements BreakTimeManager
         
         // Stop all handlers
         uiHandler.removeCallbacks(updateProgressRunnable);
+        uiHandler.removeCallbacks(updateBreakTimerRunnable);
         controlsHandler.removeCallbacks(hideControlsRunnable);
         uiHandler.removeCallbacks(hideVolumeIndicatorRunnable);
         
