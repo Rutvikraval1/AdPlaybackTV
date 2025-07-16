@@ -6,39 +6,34 @@ import android.util.Log;
 import com.example.playback_tv.tv.data.TempAdData;
 import com.example.playback_tv.tv.model.AdItem;
 import com.example.playback_tv.tv.model.AdManifest;
-import com.example.playback_tv.tv.network.ApiService;
-import com.example.playback_tv.tv.network.RetrofitClient;
-import com.example.playback_tv.tv.utils.JsonParser;
 import com.example.playback_tv.tv.utils.SharedPreferencesHelper;
 
+import com.google.gson.Gson;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class AdManager {
     private static final String TAG = "AdManager";
     private static final boolean USE_TEMP_DATA = true; // Set to false to use real API
     
     private final Context context;
-    private final ApiService apiService;
     private final CacheManager cacheManager;
     private final DownloadManager downloadManager;
     private final SharedPreferencesHelper prefsHelper;
     private final ExecutorService executor;
+    private final Gson gson;
     
     private AdManifest currentManifest;
 
     public AdManager(Context context) {
         this.context = context;
-        this.apiService = RetrofitClient.getApiService();
         this.cacheManager = new CacheManager(context);
         this.downloadManager = new DownloadManager(context);
         this.prefsHelper = new SharedPreferencesHelper(context);
         this.executor = Executors.newCachedThreadPool();
+        this.gson = new Gson();
     }
 
     public void refreshManifest(String location, ManifestCallback callback) {
@@ -52,7 +47,7 @@ public class AdManager {
                     Thread.sleep(1000);
                     
                     currentManifest = TempAdData.createTempManifest();
-                    prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+                    prefsHelper.saveManifest(gson.toJson(currentManifest));
                     
                     Log.d(TAG, "Loaded temporary manifest with " + 
                           currentManifest.getAds().size() + " items and " +
@@ -67,43 +62,15 @@ public class AdManager {
             return;
         }
         
-        // Original API call code
-        executor.execute(() -> {
-            try {
-                Call<AdManifest> call = apiService.getAdManifest(location);
-                call.enqueue(new Callback<AdManifest>() {
-                    @Override
-                    public void onResponse(Call<AdManifest> call, Response<AdManifest> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            currentManifest = response.body();
-                            prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
-                            callback.onSuccess();
-                        } else {
-                            // Fallback to temp data if API fails
-                            Log.w(TAG, "API failed, using temp data");
-                            loadTempDataAsFallback(callback);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<AdManifest> call, Throwable t) {
-                        Log.e(TAG, "Error fetching manifest", t);
-                        // Fallback to temp data if API fails
-                        loadTempDataAsFallback(callback);
-                    }
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "Exception in refreshManifest", e);
-                loadTempDataAsFallback(callback);
-            }
-        });
+        // Fallback to temp data for now
+        loadTempDataAsFallback(callback);
     }
 
     private void loadTempDataAsFallback(ManifestCallback callback) {
         executor.execute(() -> {
             try {
                 currentManifest = TempAdData.createTempManifest();
-                prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+                prefsHelper.saveManifest(gson.toJson(currentManifest));
                 Log.d(TAG, "Loaded temp data as fallback");
                 callback.onSuccess();
             } catch (Exception e) {
@@ -121,7 +88,7 @@ public class AdManager {
         // If still no manifest, load temp data
         if (currentManifest == null) {
             currentManifest = TempAdData.createTempManifest();
-            prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+            prefsHelper.saveManifest(gson.toJson(currentManifest));
         }
         
         if (currentManifest == null || currentManifest.getAds() == null) {
@@ -168,7 +135,7 @@ public class AdManager {
         if (currentManifest == null) {
             Log.d(TAG, "No cached manifest, loading temp data");
             currentManifest = TempAdData.createTempManifest();
-            prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+            prefsHelper.saveManifest(gson.toJson(currentManifest));
         }
         
         if (currentManifest != null) {
@@ -187,7 +154,7 @@ public class AdManager {
         if (currentManifest == null) {
             Log.d(TAG, "No cached manifest, loading temp data");
             currentManifest = TempAdData.createTempManifest();
-            prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+            prefsHelper.saveManifest(gson.toJson(currentManifest));
         }
         
         return currentManifest;
@@ -196,7 +163,7 @@ public class AdManager {
     private void loadCachedManifest() {
         String manifestJson = prefsHelper.getCachedManifest();
         if (manifestJson != null) {
-            currentManifest = JsonParser.fromJson(manifestJson, AdManifest.class);
+            currentManifest = gson.fromJson(manifestJson, AdManifest.class);
         }
     }
 
@@ -215,7 +182,7 @@ public class AdManager {
         currentManifest.setAds(TempAdData.createShortTestAds());
         currentManifest.setBreakIntervalMinutes(5); // 5 minutes for testing
         currentManifest.setDefaultBreakDuration(30); // 30 seconds
-        prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+        prefsHelper.saveManifest(gson.toJson(currentManifest));
     }
 
     public void loadContentOnlyPlaylist() {
@@ -226,7 +193,7 @@ public class AdManager {
         currentManifest.setAds(TempAdData.createContentOnlyPlaylist());
         currentManifest.setBreakIntervalMinutes(10); // 10 minutes for content
         currentManifest.setDefaultBreakDuration(60); // 1 minute breaks
-        prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+        prefsHelper.saveManifest(gson.toJson(currentManifest));
     }
 
     public void loadAdOnlyPlaylist() {
@@ -237,7 +204,7 @@ public class AdManager {
         currentManifest.setAds(TempAdData.createAdOnlyPlaylist());
         currentManifest.setBreakIntervalMinutes(0); // No breaks for ad-only
         currentManifest.setDefaultBreakDuration(0);
-        prefsHelper.saveManifest(JsonParser.toJson(currentManifest));
+        prefsHelper.saveManifest(gson.toJson(currentManifest));
     }
 
     public interface ManifestCallback {

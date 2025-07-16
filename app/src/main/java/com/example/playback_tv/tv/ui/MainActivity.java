@@ -13,7 +13,7 @@ import com.example.playback_tv.tv.manager.AdManager;
 import com.example.playback_tv.tv.manager.BreakTimeManager;
 import com.example.playback_tv.tv.manager.CacheManager;
 import com.example.playback_tv.tv.manager.LocationManager;
-import com.example.playback_tv.tv.service.AdPlaybackService;
+import com.example.playback_tv.tv.service.BackgroundSyncService;
 import com.example.playback_tv.tv.utils.SharedPreferencesHelper;
 
 public class MainActivity extends FragmentActivity {
@@ -51,7 +51,7 @@ public class MainActivity extends FragmentActivity {
         checkAutoResume();
         
         // Start background service
-        startAdPlaybackService();
+        startBackgroundService();
     }
 
     private void initializeComponents() {
@@ -228,8 +228,8 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    private void startAdPlaybackService() {
-        Intent serviceIntent = new Intent(this, AdPlaybackService.class);
+    private void startBackgroundService() {
+        Intent serviceIntent = new Intent(this, BackgroundSyncService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);
         }

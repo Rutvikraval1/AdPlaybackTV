@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-import com.example.playback_tv.tv.service.AdPlaybackService;
+import com.example.playback_tv.tv.service.BackgroundSyncService;
 import com.example.playback_tv.tv.ui.PlayerActivity;
 import com.example.playback_tv.tv.utils.SharedPreferencesHelper;
 
@@ -25,7 +25,7 @@ public class BootReceiver extends BroadcastReceiver {
             SharedPreferencesHelper prefsHelper = new SharedPreferencesHelper(context);
             
             // Start background service
-            Intent serviceIntent = new Intent(context, AdPlaybackService.class);
+            Intent serviceIntent = new Intent(context, BackgroundSyncService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(serviceIntent);
             }

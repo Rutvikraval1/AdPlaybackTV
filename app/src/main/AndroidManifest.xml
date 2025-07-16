@@ -65,20 +65,6 @@
         </receiver>
 
         <!-- Background Service -->
-        <service
-            android:name=".tv.service.AdPlaybackService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback"
-            tools:ignore="ForegroundServicePermission" />
-
-
-        <!-- Download Service -->
-        <service
-            android:name=".tv.service.DownloadService"
-            android:enabled="true"
-            android:exported="false" />
-
         <!-- Background Sync Service -->
         <service
             android:name=".tv.service.BackgroundSyncService"
