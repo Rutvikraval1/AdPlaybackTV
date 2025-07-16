@@ -78,6 +78,25 @@
             android:name=".tv.service.DownloadService"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- Background Sync Service -->
+        <service
+            android:name=".tv.service.BackgroundSyncService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Standard Screen Activity -->
+        <activity
+            android:name=".tv.ui.StandardScreenActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Playback_tv" />
+
+        <!-- File Browser Activity -->
+        <activity
+            android:name=".tv.ui.FileBrowserActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Playback_tv" />
     </application>
 
 </manifest>

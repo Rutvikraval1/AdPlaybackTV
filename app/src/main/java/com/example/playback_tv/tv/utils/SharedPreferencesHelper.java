@@ -20,6 +20,8 @@ public class SharedPreferencesHelper {
     private static final String KEY_LAST_PLAYBACK_TIME = "last_playback_time";
     private static final String KEY_AUTO_RESUME = "auto_resume";
     private static final String KEY_PLAYBACK_POSITION = "playback_position_";
+    private static final String KEY_UNIQUE_ID = "unique_device_id";
+    private static final String KEY_FIRST_TIME_INSTALL = "first_time_install";
     
     private final SharedPreferences prefs;
     private final Gson gson;
@@ -97,5 +99,21 @@ public class SharedPreferencesHelper {
 
     public long getPlaybackPosition(String adId) {
         return prefs.getLong(KEY_PLAYBACK_POSITION + adId, 0);
+    }
+
+    public void saveUniqueId(String uniqueId) {
+        prefs.edit().putString(KEY_UNIQUE_ID, uniqueId).apply();
+    }
+
+    public String getUniqueId() {
+        return prefs.getString(KEY_UNIQUE_ID, null);
+    }
+
+    public boolean isFirstTimeInstall() {
+        return prefs.getBoolean(KEY_FIRST_TIME_INSTALL, true);
+    }
+
+    public void setFirstTimeInstallComplete() {
+        prefs.edit().putBoolean(KEY_FIRST_TIME_INSTALL, false).apply();
     }
 }

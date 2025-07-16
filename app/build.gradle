@@ -58,6 +58,8 @@ dependencies {
     // Database
     implementation libs.room.runtime
     annotationProcessor libs.room.compiler
+    implementation 'androidx.room:room-runtime:2.7.2'
+    annotationProcessor 'androidx.room:room-compiler:2.7.2'
 
     testImplementation libs.junit
     androidTestImplementation libs.junit.v115
